@@ -95,7 +95,7 @@ def main():
         Serial_Device = init_serial_port(Port_name)
         if Serial_Device:
             for i in range(length): 
-                set_light_level_color_temperature(Serial_Device, 0, 30000, LUMINAIRE_IDs[i])
+                set_light_level_color_temperature(Serial_Device, 50, 30000, LUMINAIRE_IDs[i])
                 time.sleep(0.005)
 
           
