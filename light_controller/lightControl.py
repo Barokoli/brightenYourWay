@@ -15,10 +15,6 @@ COLOUR_TEMPERATURE_ARRAY   =  [6500,   6400,  6300,   6200,  6100,  6000,  5900,
 # Mapped values of color temperature to in HEX
 COLOUR_TEMPERATURE_HEX_ARRAY = ["1964","1900", "189C","1838","17D4","1770","170c","16A8","1644","15E0","157C","1518","14B4","1450","13EC","1388","1324","12C0","125C","11F8","1194","1130",    "10CC","1068","1004","0FA0", "0F3C", "0ED8", "0E74", "0E10","0DAC","0D48", "0CE4","0C80","0C1C" ,"0BB8", "0B54","0AF0", "0A8C"]
 
-LUMINAIRE_ID_1 = "EC86" #Example A1B3
-
-LUMINAIRE_ID_2 = "" #Example A1B3
-
 # "00" - manual mode, you are in full controll of luminaire, PIR is off
 # "01" - automatic , mode PIR sensor is in use, luminaire goes on when triggered and off after occupancy timeout
 LUMIAIRE_MODE = "01"
@@ -59,7 +55,7 @@ def init_serial_port(_port):
             return None
         
 # no need to add \n as it will be added at the end of each message
-def set_light_level_color_temperature(_luminaire_id, _serialDevice, _lightLevelValue =50, _colourTemperatureValue = 3900):
+def set_light_level_color_temperature( _serialDevice, _lightLevelValue =50, _colourTemperatureValue = 3900, _luminaire_id="2242"):
     if not _serialDevice.isOpen():
         try:
             # uncomment for debugging
@@ -91,15 +87,16 @@ def main():
     # Example Usage :
     Port_name = get_serial_port()
     # add other lights to this array
-    LUMINAIRE_IDs = ["EC86"] 
+    LUMINAIRE_IDs = ["EC86","ECC5"] 
     length =  len(LUMINAIRE_IDs) 
     
     # port Exists so init it
     if Port_name:
-        for i in range(length): 
-            Serial_Device = init_serial_port(Port_name)
-            if Serial_Device:
-      	        set_light_level_color_temperature(LUMINAIRE_IDs[i], Serial_Device, 50, 30000)
+        Serial_Device = init_serial_port(Port_name)
+        if Serial_Device:
+            for i in range(length): 
+                set_light_level_color_temperature(Serial_Device, 0, 30000, LUMINAIRE_IDs[i])
+                time.sleep(0.005)
 
           
     
