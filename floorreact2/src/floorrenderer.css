@@ -1,0 +1,53 @@
+
+.building {
+    cursor: url('./person.png') 36 36, auto;
+}
+
+.pulse {
+    fill: rgb(200, 200, 200);
+    animation: pulse 2.1s infinite;
+}
+.pulse:hover {
+    animation: none;
+}
+
+@keyframes pulse {
+background-image: linear-gradient(to right top, #ffa700, #ff9878, #ffa5be, #e2bddb, #cdcdcd);
+    1% {
+          //opacity: 1.0;
+        fill: #ffa700;
+      }
+    12.5% {
+        fill: #ff9878;
+        //opacity: 0.69;
+    }
+    25% {
+        fill: #ffa5be;
+       //opacity: 0.4122;
+    }
+    37.5% {
+        fill: #e2bddb;
+        //opacity: 0.19;
+    }
+    50% {
+        fill: #cdcdcd;
+       //opacity: 0.0489;
+    }
+
+    62.5% {
+        fill: #e2bddb;
+//opacity: 0.0;
+    }
+    75% {
+        fill:  #ffa5be;
+//opacity: 0.0489;
+    }
+    87.5% {
+        fill:  #ff9878;
+//opacity: 0.19;
+    }
+    100% {
+        fill: #ffa700;
+//opacity: 0.4122;
+    }
+}
