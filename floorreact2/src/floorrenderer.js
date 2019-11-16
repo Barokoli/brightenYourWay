@@ -1,20 +1,24 @@
 import React, { Component } from 'react';
 import floor from "./Paths2.svg";
+import roof from "./roof2.svg";
+import walls from "./Walls2.svg";
+import linetemplate from "./line_template.svg";
+import combined_struct from "./complete.svg";
 import ReactSVG from 'react-svg';
 import Victor from 'victor';
 
 class FloorRenderer extends React.Component {
     render() {
         return (
-            <div style={{width: "100%", height: "100%"}}>
-                <ReactSVG src={floor}
+            <div style={{width: "25%", height: "25%"}}>
+                <ReactSVG src={combined_struct}
                           beforeInjection={svg => {
                               svg.classList.add('svg-class-name')
                               svg.setAttribute('width', '');
                               svg.setAttribute('height', '');
-                              svg.setAttribute('style', 'width: 100%; height: 100%; position: relative');
-                              svg.setAttribute('viewBox', '-286 -789 2478 1517');
-                              //svg.setAttribute('viewBox', '-326 -286 2438 2478')
+                              svg.setAttribute('style', 'left: 0px; top: 0px; width: 70%; height: 70%; position: absolute');
+                              //svg.setAttribute('viewBox', '-1011.954 -361.3192 4461.9694 2965.88');
+                              svg.setAttribute('viewBox', '-1311.954 -761.3192 4761.9694 4088.5184');
                           }}
                           afterInjection={(error, svg) => {
                               if (error) {
@@ -25,18 +29,38 @@ class FloorRenderer extends React.Component {
                               console.log(svg.getElementById('caras_bordes.Plane.001').childNodes[1].getAttribute('points'));
 
                               var svg_elements = svg.getElementById('caras_bordes.Plane.001').childNodes;
-                              extract_graph_from_svg(svg_elements);
+                              this.travel_path = extract_graph_from_svg(svg_elements);
+                              beautify_graph(svg);
+                              console.log("Loaded scene");
+                              setup_route(this.svg_path, this.travel_path);
                           }}
                 />
+                <ReactSVG src={linetemplate}
+                          beforeInjection={svg => {
+                              svg.classList.add('svg-class-name')
+                              svg.setAttribute('width', '');
+                              svg.setAttribute('height', '');
+                              svg.setAttribute('style', 'left: 0px; top: 0px; width: 70%; height: 70%; position: absolute');
+                              //svg.setAttribute('viewBox', '-1011.954 -361.3192 4461.9694 2965.88');
+                              svg.setAttribute('viewBox', '-1311.954 -761.3192 4761.9694 4088.5184');
+                          }}
+                          afterInjection={(error, svg) => {
+                              this.svg_path = svg;
+                              console.log("Loaded path");
+                          }}
+                />
+
         </div>
         );
     }
 }
 
 class Tile {
-    constructor(name){
+    constructor(name, dom, mid){
         this.neighbours = [null, null, null, null];
         this.name = name;
+        this.me = dom;
+        this.mid = mid;
     }
 }
 
@@ -73,6 +97,63 @@ class Bound {
     }
 }
 
+function setup_route(svg_line, path) {
+    svg_line = svg_line.childNodes[1];
+    console.log(svg_line);
+    var points = [];
+    for (var i = 0; i < path.length; i++) {
+        console.log(path[i].id.mid);
+        points[i] = path[i].id.mid.x + "," + path[i].id.mid.y;
+    }
+    svg_line.setAttribute('points', points);
+    //console.log("Testout")
+    //console.log(line);
+}
+
+function beautify_graph(svg) {
+    var floor = svg.getElementById('caras_bordes.Plane.001').childNodes;
+
+    var path_color = "rgb(230, 230, 230)";
+    var wall_color = "rgb(80, 80, 80)";
+    var roof_color = "rgb(130, 130, 130)";
+
+    for (var i = 0; i < floor.length; i++){
+        var poly = floor[i * 2 + 1];
+        if (poly) {
+            if (poly.nodeName == 'polygon') {
+                poly.setAttribute('fill', path_color);
+            }
+        }
+    }
+
+    var walls = svg.getElementById('caras_bordes.Plane').childNodes;
+    for (var i = 0; i < walls.length; i++){
+        var poly = walls[i * 2 + 1];
+        if (poly) {
+            if (poly.nodeName == 'polygon') {
+                poly.setAttribute('fill', wall_color);
+                poly.setAttribute('stroke', wall_color);
+                poly.setAttribute('opacity', '1.0');
+                poly.setAttribute('stroke-opacity', '1.0');
+            }
+        }
+    }
+
+    var roofs = svg.getElementById('caras_bordes.Plane.004').childNodes;
+    for (var i = 0; i < roofs.length; i++){
+        var poly = roofs[i * 2 + 1];
+        if (poly) {
+            if (poly.nodeName == 'polygon') {
+                poly.setAttribute('fill', roof_color);
+                poly.setAttribute('stroke', roof_color);
+                poly.setAttribute('opacity', '1.0');
+                poly.setAttribute('stroke-opacity', '1.0');
+
+            }
+        }
+    }
+}
+
 function extract_graph_from_svg(dom){
     var aStar = require('ngraph.path').aStar;
     var createGraph = require('ngraph.graph');
@@ -94,7 +175,11 @@ function extract_graph_from_svg(dom){
 
                 var mid = calc_mid(coords);
 
-                bounds.update(mid[0] + "," + mid[1]);
+                bounds.update(coords[0]);
+                bounds.update(coords[1]);
+                bounds.update(coords[2]);
+                bounds.update(coords[3]);
+                //bounds.update(mid[0] + "," + mid[1]);
 
                 var spos = sort_point(coords);
 
@@ -103,7 +188,7 @@ function extract_graph_from_svg(dom){
 
                     ivecs = calc_vectors(spos);
                     //console.log(spos);
-                    console.log(ivecs);
+                    //console.log(ivecs);
                     //console.log(XYtoUV(spos[0], ivecs));
                     //console.log(XYtoUV(new Victor(0,0), ivecs));
                     //console.log(XYtoUV(new Victor(ivecs[1].x * 2 + ivecs[0].x,ivecs[1].y * 2 + ivecs[0].y), ivecs));
@@ -113,12 +198,14 @@ function extract_graph_from_svg(dom){
 
                 var uvcoords = XYtoUV(new Victor(mid[0], mid[1]), ivecs);
                 //tiles[20][41] = 1;
-                tiles[100 + parseInt(Math.floor(uvcoords.x))][100 + parseInt(Math.floor(uvcoords.y))] = new Tile("Test");
-                if (i == 0) {
+                tiles[100 + parseInt(Math.floor(uvcoords.x))][100 + parseInt(Math.floor(uvcoords.y))] =
+                    new Tile("Test", poly, new Victor(mid[0], mid[1]));
+                /*if (i == 0) {
                     console.log("Coords:");
                     console.log(Math.floor(uvcoords.x));
                     console.log(Math.floor(uvcoords.y));
-                }
+                }*/
+                poly.setAttribute('data', Math.floor(uvcoords.x) + "," + Math.floor(uvcoords.y));
                 newbounds.update(Math.floor(uvcoords.x)+","+Math.floor(uvcoords.y));
                 //console.log(Math.floor(uvcoords.x));
                 //console.log(Math.floor(uvcoords.y));
@@ -129,6 +216,8 @@ function extract_graph_from_svg(dom){
         //var points = poly.getAttribute('points');
         //console.log(dom[i * 2 + 1]);
     }
+
+    bounds.print();
 
     var graph = createGraph();
 
@@ -165,12 +254,13 @@ function extract_graph_from_svg(dom){
             return link.data.weight;
         }
     });
-    let path = pathFinder.find(tiles[72][141], tiles[72][141].neighbours[0]);
+    let path = pathFinder.find(tiles[98][148], tiles[60][132]);
     console.log(path);
 
     //var dotContent = toDot(graph);
 
     //console.log(dotContent);
+    return path;
 }
 
 function calc_mid(coords) {
@@ -203,16 +293,6 @@ function XYtoUV(inp, ivec) {
     var v = - ivec[0].y * inp.x + ivec[0].x * inp.y;
 
     return new Victor(den * u, den * v);
-
-    //inp.x / ivec[0].x;
-    //inp.y / ivec[0].x;
-    /*var a = ivec[0];
-    var b = ivec[1];
-
-    var xvec = new Victor(1.0 / (2.0 * a.x), 1.0 / (2.0 * a.y));
-    var yvec = new Victor(- (a.x * xvec.x) / b.x, - (a.y * xvec.y) / b.y);
-
-    return new Victor(inp.x * xvec.x + inp.y * xvec.y, inp.x * yvec.x + inp.y * yvec.y);*/
 }
 
 function sort_point(points) {
