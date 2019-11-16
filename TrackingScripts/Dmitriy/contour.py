@@ -8,10 +8,33 @@ def get_contours(im):
 	contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 	result = []
 	for cnt in contours:
-		if 100 > cv.contourArea(cnt) > 6:
+		rect = cv.minAreaRect(cnt)
+		#if (100 > cv.contourArea(cnt) > 6) and (rect[1][0] > 20 or rect[1][1] < 20) and (not(rect[0][0] < 30 or rect[0][1] >160 or rect[0][1]< 20)):
+		if cv.contourArea(cnt) > 1:
 			result.append(cnt)
-			return thresh, result
+	return thresh, result
 		
+
+def get_first_center(im):
+	origin_y = 90
+	origin_x = 100
+	hresh, result = get_contours(im)
+	for cnt in contours:
+		M = cv.moments(cnt)
+		cx = int(M['m10']/M['m00'])
+		cy = int(M['m01']/M['m00'])
+
+def get_new_cors(rfx, rfy, contours):
+	dist = float("inf")
+	for cnt in contours:
+		M = cv.moments(cnt)
+		cx = int(M['m10']/M['m00'])
+		cy = int(M['m01']/M['m00'])
+		curr_dist = (cx-rfx)**2 + (cy-rfy)**2
+		if curr_dist < dist:
+			dist = curr_dist
+			result = (cx,cy)
+	return result
 
 # im = cv.imread('test.jpg')
 # contours = get_contours(im)
