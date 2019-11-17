@@ -5,17 +5,42 @@ export class Home extends Component {
     constructor(props) {
         super(props);
         this.state = {expanded: props.expanded,
-                        bname: props.name}
+                        bname: props.name,
+                        switch_func: props.switch_func
+        }
     }
 
     render() {
+        //return <button onClick={() => this.state.switch_func()}></button>;
         if (this.state.expanded) {
-            return null;
+            return (
+            <div className={'fit'}>
+                <table>
+                    <tr>
+                        <td><button className={'btn'} onClick={() => this.props.switch_func()}>Test</button></td>
+                        <td><button className={'btn expandable'} onClick={() => this.props.switch_func()}>Test</button></td>
+                        <td><button className={'btn expandable'} onClick={() => this.props.switch_func()}>Test</button></td>
+                    </tr>
+                    <tr>
+                        <td><button className={'btn expandable'} onClick={() => this.props.switch_func()}>Test</button></td>
+                        <td><button className={'btn expandable'} onClick={() => this.props.switch_func()}>Test</button></td>
+                        <td><button className={'btn expandable'} onClick={() => this.props.switch_func()}>Test</button></td>
+                    </tr>
+                    <tr>
+                        <td><button className={'btn expandable'} onClick={() => this.props.switch_func()}>Test</button></td>
+                        <td><button className={'btn expandable'} onClick={() => this.props.switch_func()}>Test</button></td>
+                        <td><button className={'btn expandable'} onClick={() => this.props.switch_func()}>Test</button></td>
+                    </tr>
+                </table>
+            </div>);
         } else {
             return (
-                <button className="expandable btn"
-                        onClick={() => this.setState({expanded: true})}
-                ><span>{this.state.bname}Test</span></button>
+                <div className={'fit'}>
+                    <button className={'expandable btn fit'}
+                            onClick={() => this.setState({'expanded':true})}>
+                        <span>{this.state.bname}Non expanded</span>
+                    </button>
+                </div>
             );
         }
     }

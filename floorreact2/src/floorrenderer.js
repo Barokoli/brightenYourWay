@@ -35,20 +35,28 @@ class FloorRenderer extends React.Component {
             },
             render_floors: props.render_floors,
         }
+        this.changeState = this.changeState.bind(this)
         this.svg_bounds = [-1311.954, -761.3192, 4761.9694, 4088.5184];
     }
 
     changeState() {
         console.log("change_state!");
+        this.setState({render_floors: true});
+        //this.state.render_floors = true;
     }
 
     render() {
         if (this.state.render_floors) {
             return (
-                <ReactCursorPosition style={{width: "800px", height: "600px", position: "absolute"}}{...{
+                <div  className={'main_f'}>
+                    <h1 className={'Leftalign'}>Follow the <span style={{color: '#ffa700'}}>Orange</span> <br></br>Light</h1>
+                    <h2 className={'infobox'}>The lights will guide you <br></br>to your selected destination. <br></br>Wherever you are, it will show you the way.</h2>
+                <div className={'flex'}>
+                    <ReactCursorPosition style={{width: "800px", height: "600px"}}{...{
                     onPositionChanged: props => this.mouse_move(props, this.person_indicator, this.svg_bounds)
                 }}
                 >
+
                     <div style={{width: "800px", height: "600px"}} className={'building'}>
                         <ReactSVG src={combined_struct}
                                   beforeInjection={svg => {
@@ -83,6 +91,7 @@ class FloorRenderer extends React.Component {
                                       svg.setAttribute('width', '');
                                       svg.setAttribute('height', '');
                                       svg.setAttribute('style', 'left: 0px; top: 0px; width: 800px; height: 600px; position: absolute');
+                                      //svg.setAttribute('style', 'left: 0px; top: 0px; width: 800px; height: 600px; position: absolute');
                                       //svg.setAttribute('viewBox', '-1011.954 -361.3192 4461.9694 2965.88');
                                       svg.setAttribute('viewBox', this.svg_bounds[0] + " " + this.svg_bounds[1] + " " + this.svg_bounds[2] + " " + this.svg_bounds[3]);
                                   }}
@@ -94,16 +103,32 @@ class FloorRenderer extends React.Component {
                         />
                     </div>
                 </ReactCursorPosition>
+                </div>
+                </div>
             )
         } else {
             return (
                 <div className={'main_container'}>
                     <h1>Where do you want to go?</h1>
-                    <div>
-                        <Home expanded={false} bname={'Physo'}/>
-                        <button className="square"
-                                onClick={() => this.setState({render_floors: true})}
-                        >Switch</button>
+                    <div className={'selection_screen'}>
+                        <table className={'ftable'}>
+                            <tr>
+                                <td><button onClick={() => this.changeState()}><span>Anesthetics</span></button></td>
+                                <td><button onClick={() => this.changeState()}><span>Cardiology</span></button></td>
+                                <td><button onClick={() => this.changeState()}><span>Critical Care</span></button></td>
+                            </tr>
+                            <tr>
+                                <td><button onClick={() => this.changeState()}><span>Gynecology</span></button></td>
+                                <td><button onClick={() => this.changeState()}><span>Onocology</span></button></td>
+                                <td><button onClick={() => this.changeState()}><span>Pharmacy</span></button></td>
+                            </tr>
+                            <tr>
+                                <td><button onClick={() => this.changeState()}><span>Radiology</span></button></td>
+                                <td><button onClick={() => this.changeState()}><span>Haematology</span></button></td>
+                                <td><button onClick={() => this.changeState()}><span>Neurology</span></button></td>
+                            </tr>
+                        </table>
+
                     </div>
                 </div>
             )
