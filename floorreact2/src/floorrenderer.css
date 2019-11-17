@@ -3,6 +3,12 @@
     cursor: url('./person.png') 36 36, auto;
 }
 
+.main_container {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+}
+
 .pulse {
     fill: rgb(200, 200, 200);
     animation: pulse 2.1s infinite;
