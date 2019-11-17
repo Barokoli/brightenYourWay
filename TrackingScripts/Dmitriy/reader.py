@@ -3,23 +3,26 @@ import numpy as np
 from contour import *
 from lightControl import InitLights
 from lightControl import Blink
+from lightControl import Off
 import threading as thread
 from time import sleep
 
 backSub = cv.createBackgroundSubtractorMOG2()
 Serial_Device = InitLights()
 cap = cv.VideoCapture('output.avi')
-fps = 60
-frame_width = 110
-frame_height = 180
-out_writer = cv.VideoWriter('output_processed.avi',
-        cv.VideoWriter_fourcc('M','J','P','G'),
-        fps,
-        (frame_width,frame_height))
+#fps = 60
+#frame_width = 110
+#frame_height = 180
+#out_writer = cv.VideoWriter('output_processed.avi',
+#        cv.VideoWriter_fourcc('M','J','P','G'),
+#        fps,
+#        (frame_width,frame_height))
 
 direction = 5
 count = 0
 finder = PersonFinder()
+reset = False
+last_cnt = None
 #TODO implement stable noise precausion
 while(True):
     ret, new_frame = cap.read()
@@ -28,26 +31,33 @@ while(True):
     # ret,thresh = cv.threshold(imgray, 200, 255, cv.THRESH_BINARY)
     thresh, contours = get_contours(new_frame)
     direction, final_cnt = finder.get_new_cors(contours, direction)
+    if last_cnt is not None:
+        last_rect = cv.minAreaRect(last_cnt)
+        new_rect = cv.minAreaRect(final_cnt)
+        if ((last_rect[0][0]-new_rect[0][0])**2+(last_rect[0][1]-new_rect[0][1])**2) > 50:
+            reset = True
+    last_cnt = final_cnt
     for row in thresh:
         for i in range(len(row)):
             row[i] = 255
     #for cnt in contours:
     #    cv.drawContours(thresh, [cnt], 0, (183,23,100), -1)
     cv.drawContours(thresh, [final_cnt], 0, (183,23,100), -1)
-
-    if direction > 9 and thread.active_count() == 1:
+    if reset == True:
+        if thread.active_count() == 1:
+            thread.Thread(target=Off, args=(2, Serial_Device)).start()
+            reset = False
+            print("OFF")
+    elif direction > 9 and thread.active_count() == 1:
         thread.Thread(target=Blink, args=(1,"EC86", Serial_Device)).start()
         print("further EC86")
     elif thread.active_count() == 1:
         thread.Thread(target=Blink, args=(1,"ECC5",Serial_Device)).start()
         print("closer ECC5")
     #cv.circle(thresh, (50, 130), 1, color=(0,255,255), thickness=2, lineType=8, shift=0)
-    #width = int(thresh.shape[1] * 500)
-    #height = int(thresh.shape[0] * 500)
-    #dim = (width, height)
-    # resize image
-    #resized = cv.resize(thresh, dim, interpolation = cv.INTER_AREA)
-    cv.imshow('frame', thresh)
+    #namedWindow("Display frame", WINDOW_NORMAL)
+    cv.resizeWindow("Display frame", 400, 400);
+    cv.imshow('Display frame', thresh)
 
     #out_writer.write(thresh)
     cv.waitKey(25)

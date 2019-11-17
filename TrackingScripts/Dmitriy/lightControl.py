@@ -99,10 +99,16 @@ def Blink(duration, lightID, Serial_Device):
     start = time.time()
     while ((time.time()-start) < duration):
         set_light_level_color_temperature(Serial_Device, 50, 30000, lightID)
-        time.sleep(0.2)
+        time.sleep(0.3)
         set_light_level_color_temperature(Serial_Device, 0, 30000, lightID)
-        time.sleep(0.2)
+        time.sleep(0.3)
 
+def Off(duration, Serial_Device):
+    start = time.time()
+    set_light_level_color_temperature(Serial_Device, 0, 30000, "EC86")
+    set_light_level_color_temperature(Serial_Device, 0, 30000, "ECC5")
+    while ((time.time()-start) < duration):
+        time.sleep(0.001)
 
 
 def main():

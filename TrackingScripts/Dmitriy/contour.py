@@ -73,7 +73,7 @@ class PersonFinder:
 						self.lastResults.clear()
 						print("hardreset")
 						break
-			print("good")
+			# print("good")
 		elif dist >= self.searchSpace and self.searching == False and self.countSearch < 10:
 			self.idel = 0
 			self.checkNoise = 0
@@ -82,7 +82,7 @@ class PersonFinder:
 			res_cx = self.cx
 			res_cy = self.cy
 			result = self.lastResults[0]
-			print("bad but try to find")
+			# print("bad but try to find")
 		elif self.countSearch > 9:
 			self.checkNoise = 0
 			self.idel = 0
@@ -91,7 +91,7 @@ class PersonFinder:
 		elif self.searching == True and self.countSearch > 3:
 			self.idel = 0
 			self.checkNoise = 0
-			print("searching")
+			# print("searching")
 			if self.searchSpace < 39:
 				self.searchSpace += 5
 			for x in range(len(self.lastResults)-2):
@@ -112,11 +112,10 @@ class PersonFinder:
 			self.idel += 1
 
 
-		if res_cx > self.cx and direction < 20:
+		if res_cx > self.cx and direction < 15:
 			direction += 1
-		elif res_cx < self.cy and direction > 0:
+		elif res_cx < self.cy and direction > 5:
 			direction -= 1
-		print(dist)
 		#print(dist, res_cx, res_cy, lostTrack, self.searching, direction)
 		if not (dist >= self.searchSpace and self.searching == False and self.countSearch < 10):
 			self.lastResults.insert(0,result)
@@ -124,7 +123,7 @@ class PersonFinder:
 			del self.lastResults[-1]
 		self.cx = res_cx
 		self.cy = res_cy
-		print(dist, res_cx, res_cy, self.searching, self.idel, self.countSearch)
+		# print(dist, res_cx, res_cy, self.searching, self.idel, self.countSearch)
 		if self.idel > 0 and len(self.lastResults) > (self.idel):
 			return direction, self.lastResults[self.idel]
 		return direction, result
