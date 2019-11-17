@@ -28,7 +28,7 @@ while(True):
     ret, new_frame = cap.read()
     # fgMask = backSub.apply(new_frame)
     imgray = cv.cvtColor(new_frame, cv.COLOR_BGR2GRAY)
-    # ret,thresh = cv.threshold(imgray, 200, 255, cv.THRESH_BINARY)
+    ret,thresh = cv.threshold(imgray, 200, 255, cv.THRESH_BINARY)
     thresh, contours = get_contours(new_frame)
     direction, final_cnt = finder.get_new_cors(contours, direction)
     if last_cnt is not None:
