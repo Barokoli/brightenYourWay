@@ -57,7 +57,14 @@ while(True):
     #cv.circle(thresh, (50, 130), 1, color=(0,255,255), thickness=2, lineType=8, shift=0)
     #namedWindow("Display frame", WINDOW_NORMAL)
     cv.resizeWindow("Display frame", 400, 400);
+
+
     cv.imshow('Display frame', thresh)
+    resized = cv.resize(new_frame, (110 * 3,180 * 3), interpolation = cv.INTER_AREA)
+    x,y,w,h = cv.boundingRect(final_cnt)
+    cv.rectangle(resized,(x*3,y*3),(x*3+w*3,y*3+h*3),(0,0,255),2)
+
+    cv.imshow('Reference', resized)
 
     #out_writer.write(thresh)
     cv.waitKey(25)
