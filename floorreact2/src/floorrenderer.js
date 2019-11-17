@@ -8,6 +8,12 @@ import ReactSVG from 'react-svg';
 import Victor from 'victor';
 import ReactCursorPosition from 'react-cursor-position';
 import './floorrenderer.css';
+import Home from './home.js';
+
+function updateState(text){
+    //this.setState({text})
+    console.log("Update!");
+}
 
 class FloorRenderer extends React.Component {
     tiles;
@@ -26,63 +32,82 @@ class FloorRenderer extends React.Component {
             position: {
                 x: 0,
                 y: 0
-            }
+            },
+            render_floors: props.render_floors,
         }
         this.svg_bounds = [-1311.954, -761.3192, 4761.9694, 4088.5184];
     }
 
+    changeState() {
+        console.log("change_state!");
+    }
+
     render() {
-        return (
-            <ReactCursorPosition style={{width: "800px", height: "600px", position: "absolute"}}{...{
-                onPositionChanged: props => this.mouse_move(props, this.person_indicator, this.svg_bounds) }}
-            >
-                <div style={{width: "800px", height: "600px"}} className={'building'}>
-                    <ReactSVG src={combined_struct}
-                              beforeInjection={svg => {
-                                  svg.classList.add('svg-class-name')
-                                  svg.setAttribute('width', '');
-                                  svg.setAttribute('height', '');
-                                  svg.setAttribute('style', 'left: 0px; top: 0px; width: 800px; height: 600px; position: absolute');
-                                  //svg.setAttribute('viewBox', '-1011.954 -361.3192 4461.9694 2965.88');
-                                  svg.setAttribute('viewBox', this.svg_bounds[0] + " " + this.svg_bounds[1] + " " + this.svg_bounds[2] + " " + this.svg_bounds[3]);
-                              }}
-                              afterInjection={(error, svg) => {
-                                  if (error) {
-                                      console.error(error)
-                                      return
-                                  }
-                                  console.log(svg)
-                                  console.log(svg.getElementById('caras_bordes.Plane.001').childNodes[1].getAttribute('points'));
+        if (this.state.render_floors) {
+            return (
+                <ReactCursorPosition style={{width: "800px", height: "600px", position: "absolute"}}{...{
+                    onPositionChanged: props => this.mouse_move(props, this.person_indicator, this.svg_bounds)
+                }}
+                >
+                    <div style={{width: "800px", height: "600px"}} className={'building'}>
+                        <ReactSVG src={combined_struct}
+                                  beforeInjection={svg => {
+                                      svg.classList.add('svg-class-name')
+                                      svg.setAttribute('width', '');
+                                      svg.setAttribute('height', '');
+                                      svg.setAttribute('style', 'left: 0px; top: 0px; width: 800px; height: 600px; position: absolute');
+                                      //svg.setAttribute('viewBox', '-1011.954 -361.3192 4461.9694 2965.88');
+                                      svg.setAttribute('viewBox', this.svg_bounds[0] + " " + this.svg_bounds[1] + " " + this.svg_bounds[2] + " " + this.svg_bounds[3]);
+                                  }}
+                                  afterInjection={(error, svg) => {
+                                      if (error) {
+                                          console.error(error)
+                                          return
+                                      }
+                                      console.log(svg)
+                                      console.log(svg.getElementById('caras_bordes.Plane.001').childNodes[1].getAttribute('points'));
 
-                                  var svg_elements = svg.getElementById('caras_bordes.Plane.001').childNodes;
+                                      var svg_elements = svg.getElementById('caras_bordes.Plane.001').childNodes;
 
-                                  //[this.travel_path, this.tiles, this.ivecs]
-                                  this.travel_path = this.extract_graph_from_svg(svg_elements);
-                                  console.log(this.travel_path);
-                                  beautify_graph(svg);
-                                  console.log("Loaded scene");
-                                  setup_route(this.svg_path, this.travel_path);
-                              }}
-                    />
-                    <ReactSVG src={linetemplate}
-                              beforeInjection={svg => {
-                                  svg.classList.add('svg-class-name')
-                                  svg.setAttribute('width', '');
-                                  svg.setAttribute('height', '');
-                                  svg.setAttribute('style', 'left: 0px; top: 0px; width: 800px; height: 600px; position: absolute');
-                                  //svg.setAttribute('viewBox', '-1011.954 -361.3192 4461.9694 2965.88');
-                                  svg.setAttribute('viewBox', this.svg_bounds[0] + " " + this.svg_bounds[1] + " " + this.svg_bounds[2] + " " + this.svg_bounds[3]);
-                              }}
-                              afterInjection={(error, svg) => {
-                                  this.svg_path = svg;
-                                  console.log("Loaded path");
-                                  this.person_indicator = svg.getElementById("person_indicator")
-                              }}
-                    />
-            </div>
-            </ReactCursorPosition>
-
-        );
+                                      //[this.travel_path, this.tiles, this.ivecs]
+                                      this.travel_path = this.extract_graph_from_svg(svg_elements);
+                                      console.log(this.travel_path);
+                                      beautify_graph(svg);
+                                      console.log("Loaded scene");
+                                      setup_route(this.svg_path, this.travel_path);
+                                  }}
+                        />
+                        <ReactSVG src={linetemplate}
+                                  beforeInjection={svg => {
+                                      svg.classList.add('svg-class-name')
+                                      svg.setAttribute('width', '');
+                                      svg.setAttribute('height', '');
+                                      svg.setAttribute('style', 'left: 0px; top: 0px; width: 800px; height: 600px; position: absolute');
+                                      //svg.setAttribute('viewBox', '-1011.954 -361.3192 4461.9694 2965.88');
+                                      svg.setAttribute('viewBox', this.svg_bounds[0] + " " + this.svg_bounds[1] + " " + this.svg_bounds[2] + " " + this.svg_bounds[3]);
+                                  }}
+                                  afterInjection={(error, svg) => {
+                                      this.svg_path = svg;
+                                      console.log("Loaded path");
+                                      this.person_indicator = svg.getElementById("person_indicator")
+                                  }}
+                        />
+                    </div>
+                </ReactCursorPosition>
+            )
+        } else {
+            return (
+                <div className={'main_container'}>
+                    <h1>Where do you want to go?</h1>
+                    <div>
+                        <Home expanded={false} bname={'Physo'}/>
+                        <button className="square"
+                                onClick={() => this.setState({render_floors: true})}
+                        >Switch</button>
+                    </div>
+                </div>
+            )
+        }
     }
 
     /*
