@@ -1,84 +1,65 @@
-import cv2
+import cv2 as cv
 import numpy as np
+from contour import *
+from lightControl import InitLights
+from lightControl import Blink
+from lightControl import Off
+import threading as thread
+from time import sleep
 
-backSub = cv2.createBackgroundSubtractorMOG2()
-cap = cv2.VideoCapture('/Users/home/Desktop/stuff/work/code/Junction/light-navigation/stick/output/output.avi')
-fps = 60
-frame_width = 110	
-frame_height = 180
-out_writer = cv2.VideoWriter('/Users/home/Desktop/stuff/work/code/Junction/light-navigation/stick/output/output_processed.avi',
-        cv2.VideoWriter_fourcc('M','J','P','G'), 
-        fps,
-        (frame_width,frame_height))
-i=0
+backSub = cv.createBackgroundSubtractorMOG2()
+Serial_Device = InitLights()
+cap = cv.VideoCapture('output.avi')
+#fps = 60
+#frame_width = 110
+#frame_height = 180
+#out_writer = cv.VideoWriter('output_processed.avi',
+#        cv.VideoWriter_fourcc('M','J','P','G'),
+#        fps,
+#        (frame_width,frame_height))
 
-def get_max_x(frame):
-	window_size = 2
-	frame_2d = np.sum(frame, 0)
-	frame_1d = np.sum(frame_2d, 1)
-	length = frame_1d.shape[0]
-	window_sum = 0
-	for i in range(window_size, length-window_size):
-		cur_window = sum(frame_1d[i-window_size: i + window_size])
-		if cur_window > window_sum:
-			max_ind = i
-			window_sum = cur_window
-	print(max_ind)
-# Setup SimpleBlobDetector parameters.
-# params = cv2.SimpleBlobDetector_Params()
- 
-# # Change thresholds
-# params.minThreshold = 220;
-# params.maxThreshold = 255;
- 
-# # Filter by Area.
-# params.filterByArea = True
-# params.minArea = 20
- 
-# # Filter by Circularity
-# params.filterByCircularity = True
-# params.minCircularity = 0.1
- 
-# # Filter by Convexity
-# params.filterByConvexity = True
-# params.minConvexity = 0.87
- 
-# # Filter by Inertia
-# params.filterByInertia = True
-# params.minInertiaRatio = 0.01
-# ver = (cv2.__version__).split('.')
-# if int(ver[0]) < 3 :
-#    detector = cv2.SimpleBlobDetector(params)
-# else : 
-#     detector = cv2.SimpleBlobDetector_create(params)
-# ret, new_frame = cap.read()
-while(i < 20*60):
-	# old_drame = new_frame
+direction = 5
+count = 0
+finder = PersonFinder()
+reset = False
+last_cnt = None
+#TODO implement stable noise precausion
+while(True):
+    ret, new_frame = cap.read()
+    # fgMask = backSub.apply(new_frame)
+    imgray = cv.cvtColor(new_frame, cv.COLOR_BGR2GRAY)
+    ret,thresh = cv.threshold(imgray, 200, 255, cv.THRESH_BINARY)
+    thresh, contours = get_contours(new_frame)
+    direction, final_cnt = finder.get_new_cors(contours, direction)
+    if last_cnt is not None:
+        last_rect = cv.minAreaRect(last_cnt)
+        new_rect = cv.minAreaRect(final_cnt)
+        if ((last_rect[0][0]-new_rect[0][0])**2+(last_rect[0][1]-new_rect[0][1])**2) > 50:
+            reset = True
+    last_cnt = final_cnt
+    for row in thresh:
+        for i in range(len(row)):
+            row[i] = 255
+    #for cnt in contours:
+    #    cv.drawContours(thresh, [cnt], 0, (183,23,100), -1)
+    cv.drawContours(thresh, [final_cnt], 0, (183,23,100), -1)
+    if reset == True:
+        if thread.active_count() == 1:
+            thread.Thread(target=Off, args=(2, Serial_Device)).start()
+            reset = False
+            print("OFF")
+    elif direction > 9 and thread.active_count() == 1:
+        thread.Thread(target=Blink, args=(1,"EC86", Serial_Device)).start()
+        print("further EC86")
+    elif thread.active_count() == 1:
+        thread.Thread(target=Blink, args=(1,"ECC5",Serial_Device)).start()
+        print("closer ECC5")
+    #cv.circle(thresh, (50, 130), 1, color=(0,255,255), thickness=2, lineType=8, shift=0)
+    #namedWindow("Display frame", WINDOW_NORMAL)
+    cv.resizeWindow("Display frame", 400, 400);
+    cv.imshow('Display frame', thresh)
 
-	ret, new_frame = cap.read()
-	get_max_x(new_frame)
-	# diff = new_frame - old_drame
-	fgMask = backSub.apply(new_frame)
-	ret,thresh = cv2.threshold(new_frame, 200, 255,cv2.THRESH_BINARY)
-	# if (i < 600):
-	# 	cv2.imshow('10', thresh)
-	# 	cv2.waitKey(0)
-	# 	cv2.imwrite('test.jpg', thresh)
-	# contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-	# print(len(contours))
-	# out_writer.write(thresh)
-	if (True):
-		# keypoints = detector.detect(thresh)
-		# print(keypoints)
-		# # cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS ensures the size of the circle corresponds to the size of blob
-		# im_with_keypoints = cv2.drawKeypoints(fgMask, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-		out_writer.write(thresh)
-		# cv2.imshow("Keypoints", im_with_keypoints)
-		# cv2.waitKey(0)
+    #out_writer.write(thresh)
+    cv.waitKey(25)
 
-		# cv2.imshow(f'frame{i}', thresh)
-		# res = cv2.waitKey(0)
-		# print(ret, i)
-	i += 1
-
-out_writer.release()
+# out_writer.release()
